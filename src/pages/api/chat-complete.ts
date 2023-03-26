@@ -1,24 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import OpenAi from '@/lib/openai-api'
 import type { ChatCompletionRequestMessage, CreateChatCompletionResponse } from 'openai'
-
-const validateRequest = (req: NextApiRequest): boolean => {
-    return (
-        req.method === 'POST' &&
-        req.body?.messages satisfies Array<ChatCompletionRequestMessage>
-    )
-}
-
-const getMessage = (res: CreateChatCompletionResponse): string => {
-    if (
-        res.choices.length > 0 &&
-        res.choices[0]?.finish_reason === 'stop' &&
-        res.choices[0]?.message
-    ) {
-        return res.choices[0].message.content
-    }
-    return ''
-}
+import OpenAi from '@/lib/openai-api'
 
 // endpoint to generate chat completion given list of messages
 const completeChat = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -37,9 +19,26 @@ const completeChat = async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(500).send({ message: 'Chat completion failed' })
         return
     }
-
     // return generated message
     res.status(200).json(message)
+}
+
+const validateRequest = (req: NextApiRequest): boolean => {
+    return (
+        req.method === 'POST' &&
+        req.body?.messages satisfies Array<ChatCompletionRequestMessage>
+    )
+}
+
+const getMessage = (res: CreateChatCompletionResponse): string => {
+    if (
+        res.choices.length > 0 &&
+        res.choices[0]?.finish_reason === 'stop' &&
+        res.choices[0]?.message
+    ) {
+        return res.choices[0].message.content
+    }
+    return ''
 }
 
 export default completeChat
