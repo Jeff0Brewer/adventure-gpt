@@ -1,7 +1,7 @@
 .chat {
     display: grid;
     grid-template-areas: "a" "b";
-    grid-template-rows: 1fr 100px;
+    grid-template-rows: 1fr 50px;
     height: 100vh;
 }
 
@@ -16,4 +16,17 @@
 
 .input {
     grid-area: "b";
+    display: flex;
+}
+
+.send, .text {
+    height: 100%;
+}
+
+.send {
+    width: 80px;
+}
+
+.text {
+    width: calc(100% - 80px);
 }
