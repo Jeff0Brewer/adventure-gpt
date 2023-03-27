@@ -2,6 +2,7 @@ import React, { FC, useRef, useState, useEffect } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import PROMPT from '@/lib/prompt'
 import { postBody } from '@/lib/fetch'
+import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
     const inputRef = useRef<HTMLInputElement>(null)
@@ -37,9 +38,9 @@ const Game: FC = () => {
     }
 
     return (
-        <section>
-            <p ref={outputRef}>{getLastResponse(messages)}</p>
-            <input ref={inputRef} type="text" />
+        <section className={styles.chat}>
+            <p className={styles.output} ref={outputRef}>{getLastResponse(messages)}</p>
+            <input className={styles.input} ref={inputRef} type="text" />
         </section>
     )
 }
