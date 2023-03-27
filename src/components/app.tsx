@@ -1,8 +1,11 @@
 import React, { FC } from 'react'
+import Game from '@/components/game'
 
 const App: FC = () => {
     return (
-        <p>app</p>
+        <main>
+            <Game />
+        </main>
     )
 }
 

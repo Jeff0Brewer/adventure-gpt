@@ -2,8 +2,12 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import type { ChatCompletionRequestMessage, CreateChatCompletionResponse } from 'openai'
 import OpenAi from '@/lib/openai-api'
 
+type CompletionResponse = {
+    message: string
+}
+
 // endpoint to generate chat completion given list of messages
-const completeChat = async (req: NextApiRequest, res: NextApiResponse) => {
+const completeChat = async (req: NextApiRequest, res: NextApiResponse<CompletionResponse>) => {
     // ensure POST request contains required data
     if (!validateRequest(req)) {
         res.status(400).send({ message: 'POST request must contain list of messages' })
@@ -16,11 +20,11 @@ const completeChat = async (req: NextApiRequest, res: NextApiResponse) => {
     // ensure response has complete message data
     const message = getMessage(completion.data)
     if (!message) {
-        res.status(500).send({ message: 'Chat completion failed' })
+        res.status(500).send({ message: 'Completion did not finish' })
         return
     }
     // return generated message
-    res.status(200).json(message)
+    res.status(200).send({ message })
 }
 
 const validateRequest = (req: NextApiRequest): boolean => {
