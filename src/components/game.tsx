@@ -45,7 +45,7 @@ type GameOutputProps = {
 
 const GameOutput: FC<GameOutputProps> = props => {
     return (
-        <div>{
+        <div className={styles.output}>{
             props.messages.map((msg: Message, i: number) =>
                 <MessageDisplay message={msg} key={i} />)
         }</div>
@@ -58,7 +58,9 @@ type MessageDisplayProps = {
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
     return (
-        <p>{props.message.content}</p>
+        <p className={styles.msg} data-role={props.message.role}>
+            {props.message.content}
+        </p>
     )
 }
 
