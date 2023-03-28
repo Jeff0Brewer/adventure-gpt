@@ -3,14 +3,14 @@ import type { ChatCompletionRequestMessage, CreateChatCompletionResponse } from 
 import OpenAi from '@/lib/openai-api'
 
 type CompletionResponse = {
-    message: string
+    content: string
 }
 
 // endpoint to generate chat completion given list of messages
 const completeChat = async (req: NextApiRequest, res: NextApiResponse<CompletionResponse>) => {
     // ensure POST request contains required data
     if (!validateRequest(req)) {
-        res.status(400).send({ message: 'POST request must contain list of messages' })
+        res.status(400).send({ content: 'POST request must contain list of messages' })
         return
     }
     const completion = await OpenAi.createChatCompletion({
@@ -18,13 +18,13 @@ const completeChat = async (req: NextApiRequest, res: NextApiResponse<Completion
         messages: req.body.messages
     })
     // ensure response has complete message data
-    const message = getMessage(completion.data)
-    if (!message) {
-        res.status(500).send({ message: 'Completion did not finish' })
+    const content = getMessage(completion.data)
+    if (!content) {
+        res.status(500).send({ content: 'Incomplete response' })
         return
     }
     // return generated message
-    res.status(200).send({ message })
+    res.status(200).send({ content })
 }
 
 const validateRequest = (req: NextApiRequest): boolean => {
