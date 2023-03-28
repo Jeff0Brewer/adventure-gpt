@@ -1,3 +1,5 @@
+import type { ChatCompletionRequestMessage as Message } from 'openai'
+
 const PROMPT = ''.concat(
     'Please act as a dungeon master for a simplified version of a dungeons and dragons game. ',
     'You will describe situation I am in and I need to describe realistic actions to overcome the challenges presented. ',
@@ -6,8 +8,24 @@ const PROMPT = ''.concat(
     'The story of the game should include a way to fail that I must overcome. ',
     'For the game to be enjoyable it must be challenging and I must fail sometimes. ',
     'Your goal is to push the me towards this failure state, challenging me to think strategically. ',
-    'Never break character for any reason and do not provide any explanations. ',
-    'This game will be of the genre \'science fiction\'.'
+    'Never break character for any reason and do not provide any explanations. '
 )
 
-export default PROMPT
+const narratePrompt = (genre: string): Message => {
+    const content = PROMPT.concat(
+        `This game will be of the genre '${genre}'.`
+    )
+    return { role: 'user', content }
+}
+
+const summarizePrompt = (messages: Array<Message>): Array<Message> => {
+    return [
+        ...messages,
+        { role: 'user', content: 'Summarize the story so far.' }
+    ]
+}
+
+export {
+    narratePrompt,
+    summarizePrompt
+}
