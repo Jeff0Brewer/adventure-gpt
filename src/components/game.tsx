@@ -51,15 +51,18 @@ const Game: FC = () => {
         return completeChat(summarizePrompt(messages))
     }
 
-    // concat message to state
-    const addMessage = (message: Message): void => {
-        setMessages([...messages, message])
+    // add user message to state
+    const userMessage = (content: string): void => {
+        // prevent user from sending message before recieving response
+        if (messages[messages.length - 1].role !== 'user') {
+            setMessages([...messages, { role: 'user', content }])
+        }
     }
 
     return (
         <section className={styles.chat}>
             <GameOutput messages={messages} />
-            <GameInput addMessage={addMessage} />
+            <GameInput addMessage={userMessage} />
         </section>
     )
 }
@@ -90,7 +93,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
 }
 
 type GameInputProps = {
-    addMessage: (message: Message) => void
+    addMessage: (content: string) => void
 }
 
 const GameInput: FC<GameInputProps> = props => {
@@ -98,7 +101,7 @@ const GameInput: FC<GameInputProps> = props => {
 
     const sendMessage = (): void => {
         if (!inputRef.current) { return }
-        props.addMessage({ role: 'user', content: inputRef.current.value })
+        props.addMessage(inputRef.current.value)
         inputRef.current.value = ''
     }
 
