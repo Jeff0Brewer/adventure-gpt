@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState, useEffect } from 'react'
+import React, { FC, useRef, useState, useEffect, ReactElement } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import { postBody } from '@/lib/fetch'
 import { narratePrompt, summarizePrompt } from '@/lib/prompt'
@@ -72,11 +72,23 @@ type GameOutputProps = {
 }
 
 const GameOutput: FC<GameOutputProps> = props => {
+    const userLast = props.messages[props.messages.length - 1].role === 'user'
+    const displayInd = props.messages.length - (userLast ? 2 : 1)
+
+    // convert message to element
+    const getDisplay = (msg: Message, i: number): ReactElement => {
+        return <MessageDisplay message={msg} key={i} />
+    }
+
     return (
-        <div className={styles.output}>{
-            props.messages.map((msg: Message, i: number) =>
-                <MessageDisplay message={msg} key={i} />)
-        }</div>
+        <div className={styles.output}>
+            <div>
+                { props.messages.slice(0, displayInd).map(getDisplay) }
+                <div className={styles.currentMove}>
+                    { props.messages.slice(displayInd).map(getDisplay) }
+                </div>
+            </div>
+        </div>
     )
 }
 
