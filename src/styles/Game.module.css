@@ -9,11 +9,12 @@
 
 .output {
     grid-area: "a";
-    max-width: 800px;
-    margin: auto;
+    overflow-y: scroll;
 }
 
 .msg {
+    max-width: 800px;
+    margin: 0 auto;
     display: grid;
     place-content: center;
     padding: 20px;
@@ -21,6 +22,7 @@
 
 .msg[data-role="user"] {
     color: #fcf;
+    text-align: center;
 }
 
 .input {
