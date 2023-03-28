@@ -5,9 +5,9 @@ import { narratePrompt, summarizePrompt } from '@/lib/prompt'
 import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
-    const MESSAGE_LIMIT = 10
+    const MESSAGE_LIMIT = 12
     const SUMMARY_COUNT = 6 // even number so summary starts with prompt, ends with assistant msg
-    const GENRE = 'medieval fantasy'
+    const GENRE = 'science fiction'
     const [messages, setMessages] = useState<Array<Message>>([narratePrompt(GENRE)])
 
     useEffect(() => {
