@@ -1,57 +1,84 @@
 import React, { FC, useRef, useState, useEffect } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
-import PROMPT from '@/lib/prompt'
 import { postBody } from '@/lib/fetch'
+import PROMPT from '@/lib/prompt'
 import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
-    const [messages, setMessages] = useState<Array<Message>>([])
-    const [response, setResponse] = useState<string>('')
+    const [messages, setMessages] = useState<Array<Message>>([
+        { role: 'user', content: PROMPT }
+    ])
 
     useEffect(() => {
-        getCompletion({ role: 'user', content: PROMPT })
-    }, [])
-
-    // set message state from new user message
-    const getCompletion = async (message: Message): Promise<void> => {
-        const newMessages = [...messages, message]
-        const completion = await fetch('/api/chat-complete', postBody({ messages: newMessages }))
-        if (completion.status === 200) {
-            const { message: content } = await completion.json()
-            setMessages([...newMessages, { role: 'assistant', content }])
-            setResponse(content)
-        } else {
-            const { message } = await completion.json()
-            console.error(`Chat complete error: ${message}`)
+        // get response any time user sent last message
+        if (messages[messages.length - 1].role === 'user') {
+            getResponse()
         }
+    }, [messages])
+
+    // get next response to current chat
+    const getResponse = async (): Promise<void> => {
+        const completion = await fetch('/api/chat-complete', postBody({ messages }))
+        const { content } = await completion.json()
+        if (!completion.ok) {
+            // error if message content incomplete
+            throw new Error(`Chat completion error: ${content}`)
+        }
+        addMessage({ role: 'assistant', content })
+    }
+
+    const addMessage = (message: Message): void => {
+        setMessages([...messages, message])
     }
 
     return (
         <section className={styles.chat}>
-            <p className={styles.output}>{response}</p>
-            <GameInput getCompletion={getCompletion} />
+            <GameOutput messages={messages} />
+            <GameInput addMessage={addMessage} />
         </section>
     )
 }
 
+type GameOutputProps = {
+    messages: Array<Message>
+}
+
+const GameOutput: FC<GameOutputProps> = props => {
+    return (
+        <div className={styles.output}>{
+            props.messages.map((msg: Message, i: number) =>
+                <MessageDisplay message={msg} key={i} />)
+        }</div>
+    )
+}
+
+type MessageDisplayProps = {
+    message: Message
+}
+
+const MessageDisplay: FC<MessageDisplayProps> = props => {
+    return (
+        <p className={styles.msg} data-role={props.message.role}>
+            {props.message.content}
+        </p>
+    )
+}
+
 type GameInputProps = {
-    getCompletion: (message: Message) => void
+    addMessage: (message: Message) => void
 }
 
 const GameInput: FC<GameInputProps> = props => {
     const inputRef = useRef<HTMLInputElement>(null)
 
     const sendMessage = (): void => {
-        if (!inputRef.current) return
-        const content = inputRef.current.value
+        if (!inputRef.current) { return }
+        props.addMessage({ role: 'user', content: inputRef.current.value })
         inputRef.current.value = ''
-        props.getCompletion({ role: 'user', content })
     }
 
     const keySend = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            sendMessage()
-        }
+        if (e.key === 'Enter') { sendMessage() }
     }
 
     return (
