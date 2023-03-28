@@ -1,7 +1,7 @@
 import React, { FC, useRef, useState, useEffect } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
-import PROMPT from '@/lib/prompt'
 import { postBody } from '@/lib/fetch'
+import PROMPT from '@/lib/prompt'
 import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
@@ -31,17 +31,34 @@ const Game: FC = () => {
         setMessages([...messages, message])
     }
 
-    const lastResponse = (): string => {
-        const responses = messages.filter(msg => msg.role === 'assistant')
-        if (!responses.length) return ''
-        return responses[responses.length - 1].content
-    }
-
     return (
         <section className={styles.chat}>
-            <p className={styles.output}>{lastResponse()}</p>
+            <GameOutput messages={messages} />
             <GameInput addMessage={addMessage} />
         </section>
+    )
+}
+
+type GameOutputProps = {
+    messages: Array<Message>
+}
+
+const GameOutput: FC<GameOutputProps> = props => {
+    return (
+        <div>{
+            props.messages.map((msg: Message, i: number) =>
+                <MessageDisplay message={msg} key={i} />)
+        }</div>
+    )
+}
+
+type MessageDisplayProps = {
+    message: Message
+}
+
+const MessageDisplay: FC<MessageDisplayProps> = props => {
+    return (
+        <p>{props.message.content}</p>
     )
 }
 
