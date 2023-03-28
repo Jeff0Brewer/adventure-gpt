@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState, useEffect } from 'react'
+import React, { FC, useRef, useState, useEffect, ReactElement } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import { postBody } from '@/lib/fetch'
 import { narratePrompt, summarizePrompt } from '@/lib/prompt'
@@ -51,15 +51,18 @@ const Game: FC = () => {
         return completeChat(summarizePrompt(messages))
     }
 
-    // concat message to state
-    const addMessage = (message: Message): void => {
-        setMessages([...messages, message])
+    // add user message to state
+    const userMessage = (content: string): void => {
+        // prevent user from sending message before recieving response
+        if (messages[messages.length - 1].role !== 'user') {
+            setMessages([...messages, { role: 'user', content }])
+        }
     }
 
     return (
         <section className={styles.chat}>
             <GameOutput messages={messages} />
-            <GameInput addMessage={addMessage} />
+            <GameInput addMessage={userMessage} />
         </section>
     )
 }
@@ -69,11 +72,23 @@ type GameOutputProps = {
 }
 
 const GameOutput: FC<GameOutputProps> = props => {
+    const userLast = props.messages[props.messages.length - 1].role === 'user'
+    const displayInd = props.messages.length - (userLast ? 2 : 1)
+
+    // convert message to element
+    const getDisplay = (msg: Message, i: number): ReactElement => {
+        return <MessageDisplay message={msg} key={i} />
+    }
+
     return (
-        <div className={styles.output}>{
-            props.messages.map((msg: Message, i: number) =>
-                <MessageDisplay message={msg} key={i} />)
-        }</div>
+        <div className={styles.output}>
+            <div>
+                { props.messages.slice(0, displayInd).map(getDisplay) }
+                <div className={styles.currentMove}>
+                    { props.messages.slice(displayInd).map(getDisplay) }
+                </div>
+            </div>
+        </div>
     )
 }
 
@@ -90,7 +105,7 @@ const MessageDisplay: FC<MessageDisplayProps> = props => {
 }
 
 type GameInputProps = {
-    addMessage: (message: Message) => void
+    addMessage: (content: string) => void
 }
 
 const GameInput: FC<GameInputProps> = props => {
@@ -98,7 +113,7 @@ const GameInput: FC<GameInputProps> = props => {
 
     const sendMessage = (): void => {
         if (!inputRef.current) { return }
-        props.addMessage({ role: 'user', content: inputRef.current.value })
+        props.addMessage(inputRef.current.value)
         inputRef.current.value = ''
     }
 
