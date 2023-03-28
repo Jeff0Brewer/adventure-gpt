@@ -10,7 +10,7 @@ type CompletionResponse = {
 const completeChat = async (req: NextApiRequest, res: NextApiResponse<CompletionResponse>) => {
     // ensure POST request contains required data
     if (!validateRequest(req)) {
-        res.status(400).send({ content: 'POST request must contain list of messages' })
+        res.status(400).json({ content: 'POST request must contain list of messages' })
         return
     }
     const completion = await OpenAi.createChatCompletion({
@@ -20,11 +20,11 @@ const completeChat = async (req: NextApiRequest, res: NextApiResponse<Completion
     // ensure response has complete message data
     const content = getMessage(completion.data)
     if (!content) {
-        res.status(500).send({ content: 'Incomplete response' })
+        res.status(500).json({ content: 'Incomplete response' })
         return
     }
     // return generated message
-    res.status(200).send({ content })
+    res.status(200).json({ content })
 }
 
 const validateRequest = (req: NextApiRequest): boolean => {
