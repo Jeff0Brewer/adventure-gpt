@@ -3,15 +3,24 @@
     grid-template-areas: "a" "b";
     grid-template-rows: 1fr 50px;
     height: 100vh;
+    background-color: #000;
+    color: #fff;
 }
 
 .output {
     grid-area: "a";
-    display: grid;
-    place-content: center;
     max-width: 800px;
     margin: auto;
+}
+
+.msg {
+    display: grid;
+    place-content: center;
     padding: 20px;
+}
+
+.msg[data-role="user"] {
+    color: #fcf;
 }
 
 .input {
@@ -21,6 +30,9 @@
 
 .send, .text {
     height: 100%;
+    background-color: inherit;
+    color: inherit;
+    border: 1px solid #fff;
 }
 
 .send {
