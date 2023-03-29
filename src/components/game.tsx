@@ -6,7 +6,7 @@ import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
     const MESSAGE_LIMIT = 10
-    const SUMMARY_COUNT = 5
+    const SUMMARY_COUNT = 6
     const NARRATE_PROMPT = narratePrompt('prehistoric times')
     const [messages, setMessages] = useState<Array<Message>>([NARRATE_PROMPT, START_PROMPT])
 
@@ -21,8 +21,8 @@ const Game: FC = () => {
             // don't async summarize when message list could receive new user message
             return
         }
-        // start generating response
-        const responsePromise = completeChat(messages)
+        // generate response, append prompt to stay in character
+        const responsePromise = completeChat([...messages, CHARACTER_PROMPT])
 
         // summarize messages if over limit
         let summarized = messages
@@ -41,9 +41,6 @@ const Game: FC = () => {
 
     // get next response to chat messages
     const completeChat = async (messages: Array<Message>): Promise<Message> => {
-        // append prompt to prioritize staying in character
-        messages = [...messages, CHARACTER_PROMPT]
-
         const completion = await fetch('/api/chat-complete', postBody({ messages }))
         const { content } = await completion.json()
         if (!completion.ok) {
