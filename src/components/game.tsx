@@ -1,14 +1,14 @@
 import React, { FC, useRef, useState, useEffect, ReactElement } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import { postBody } from '@/lib/fetch'
-import { systemPrompt, startPrompt, summarizePrompt } from '@/lib/prompt'
+import { narratePrompt, summarizePrompt, START_PROMPT, CHARACTER_PROMPT } from '@/lib/prompt'
 import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
-    const MESSAGE_LIMIT = 12
-    const SUMMARY_COUNT = 8
-    const GENRE = 'prehistoric times'
-    const [messages, setMessages] = useState<Array<Message>>([systemPrompt(GENRE), startPrompt()])
+    const MESSAGE_LIMIT = 10
+    const SUMMARY_COUNT = 5
+    const NARRATE_PROMPT = narratePrompt('prehistoric times')
+    const [messages, setMessages] = useState<Array<Message>>([NARRATE_PROMPT, START_PROMPT])
 
     useEffect(() => {
         updateMessages()
@@ -27,8 +27,7 @@ const Game: FC = () => {
         if (messages.length > MESSAGE_LIMIT) {
             // summarize messages only if over limit
             const summary = await summarize(messages.slice(0, SUMMARY_COUNT))
-            const system = messages[0]
-            summarized = [system, summary, ...messages.slice(SUMMARY_COUNT)]
+            summarized = [NARRATE_PROMPT, summary, ...messages.slice(SUMMARY_COUNT)]
         }
         // set new message state
         const response = await responsePromise
@@ -37,6 +36,8 @@ const Game: FC = () => {
 
     // get next response to chat messages
     const completeChat = async (messages: Array<Message>): Promise<Message> => {
+        // append prompt to prioritize staying in character
+        messages = [...messages, CHARACTER_PROMPT]
         const completion = await fetch('/api/chat-complete', postBody({ messages }))
         const { content } = await completion.json()
         if (!completion.ok) {
