@@ -12,12 +12,10 @@ const narratePrompt = (genre: string): Message => {
     return { role: 'system', content }
 }
 
-// get prompt to summarize list of messages
-const summarizePrompt = (messages: Array<Message>): Array<Message> => {
-    return [
-        ...messages,
-        { role: 'user', content: 'Summarize the story so far.' }
-    ]
+// gets summary of story for context minimization
+const SUMMARY_PROMPT: Message = {
+    role: 'user',
+    content: 'Summarize the story so far.'
 }
 
 // starts game, indicates that chat user is player in game
@@ -35,7 +33,7 @@ const CHARACTER_PROMPT: Message = {
 
 export {
     narratePrompt,
-    summarizePrompt,
+    SUMMARY_PROMPT,
     START_PROMPT,
     CHARACTER_PROMPT
 }

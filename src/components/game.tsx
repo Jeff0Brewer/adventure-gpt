@@ -1,7 +1,7 @@
 import React, { FC, useRef, useState, useEffect, ReactElement } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import { postBody } from '@/lib/fetch'
-import { narratePrompt, summarizePrompt, START_PROMPT, CHARACTER_PROMPT } from '@/lib/prompt'
+import { narratePrompt, SUMMARY_PROMPT, START_PROMPT, CHARACTER_PROMPT } from '@/lib/prompt'
 import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
@@ -10,25 +10,30 @@ const Game: FC = () => {
     const NARRATE_PROMPT = narratePrompt('prehistoric times')
     const [messages, setMessages] = useState<Array<Message>>([NARRATE_PROMPT, START_PROMPT])
 
+    // watch messages for changes, generate responses and summarize as needed
     useEffect(() => {
         updateMessages()
     }, [messages])
 
-    // get assistant responses, summarize messages when context too large
     const updateMessages = async () => {
         if (messages[messages.length - 1].role !== 'user') {
-            // when last message not from user, message state could change any time
-            // don't want to async summarize when message list could mutate
+            // don't generate response unless user sent last message
+            // don't async summarize when message list could receive new user message
             return
         }
         // start generating response
         const responsePromise = completeChat(messages)
+
+        // summarize messages if over limit
         let summarized = messages
         if (messages.length > MESSAGE_LIMIT) {
-            // summarize messages only if over limit
-            const summary = await summarize(messages.slice(0, SUMMARY_COUNT))
+            const summary = await completeChat([
+                ...messages.slice(0, SUMMARY_COUNT),
+                SUMMARY_PROMPT
+            ])
             summarized = [NARRATE_PROMPT, summary, ...messages.slice(SUMMARY_COUNT)]
         }
+
         // set new message state
         const response = await responsePromise
         setMessages([...summarized, response])
@@ -38,6 +43,7 @@ const Game: FC = () => {
     const completeChat = async (messages: Array<Message>): Promise<Message> => {
         // append prompt to prioritize staying in character
         messages = [...messages, CHARACTER_PROMPT]
+
         const completion = await fetch('/api/chat-complete', postBody({ messages }))
         const { content } = await completion.json()
         if (!completion.ok) {
@@ -45,11 +51,6 @@ const Game: FC = () => {
             throw new Error(`Chat completion error: ${content}`)
         }
         return { role: 'assistant', content }
-    }
-
-    // get prompt to summarize list of messages and generate response
-    const summarize = async (messages: Array<Message>): Promise<Message> => {
-        return completeChat(summarizePrompt(messages))
     }
 
     // add user message to state
