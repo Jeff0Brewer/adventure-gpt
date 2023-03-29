@@ -1,14 +1,14 @@
 import React, { FC, useRef, useState, useEffect, ReactElement } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
 import { postBody } from '@/lib/fetch'
-import { narratePrompt, summarizePrompt } from '@/lib/prompt'
+import { systemPrompt, startPrompt, summarizePrompt } from '@/lib/prompt'
 import styles from '@/styles/Game.module.css'
 
 const Game: FC = () => {
     const MESSAGE_LIMIT = 12
-    const SUMMARY_COUNT = 6 // even number so summary starts with prompt, ends with assistant msg
-    const GENRE = 'science fiction'
-    const [messages, setMessages] = useState<Array<Message>>([narratePrompt(GENRE)])
+    const SUMMARY_COUNT = 8
+    const GENRE = 'prehistoric times'
+    const [messages, setMessages] = useState<Array<Message>>([systemPrompt(GENRE), startPrompt()])
 
     useEffect(() => {
         updateMessages()
@@ -26,9 +26,9 @@ const Game: FC = () => {
         let summarized = messages
         if (messages.length > MESSAGE_LIMIT) {
             // summarize messages only if over limit
-            const prompt = messages[0]
             const summary = await summarize(messages.slice(0, SUMMARY_COUNT))
-            summarized = [prompt, summary, ...messages.slice(SUMMARY_COUNT)]
+            const system = messages[0]
+            summarized = [system, summary, ...messages.slice(SUMMARY_COUNT)]
         }
         // set new message state
         const response = await responsePromise
