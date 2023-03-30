@@ -1,5 +1,6 @@
 import React, { FC, useRef, useState, useEffect, ReactElement } from 'react'
 import type { ChatCompletionRequestMessage as Message } from 'openai'
+import ReactMarkdown from 'react-markdown'
 import { postBody } from '@/lib/fetch'
 import { narratePrompt, SUMMARY_PROMPT, START_PROMPT, CHARACTER_PROMPT } from '@/lib/prompt'
 import styles from '@/styles/Game.module.css'
@@ -97,9 +98,9 @@ type MessageDisplayProps = {
 
 const MessageDisplay: FC<MessageDisplayProps> = props => {
     return (
-        <p className={styles.msg} data-role={props.message.role}>
-            {props.message.content}
-        </p>
+        <div className={styles.msg} data-role={props.message.role}>
+            <ReactMarkdown>{props.message.content}</ReactMarkdown>
+        </div>
     )
 }
 
