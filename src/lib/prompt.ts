@@ -16,7 +16,7 @@ const narratePrompt = (genre: string): Message => {
 // gets summary of story for context minimization
 const SUMMARY_PROMPT: Message = {
     role: 'user',
-    content: 'Summarize the story so far.'
+    content: 'Summarize the story so far, please include all information about the setting and player equipment.'
 }
 
 // starts game, indicates that chat user is player in game
