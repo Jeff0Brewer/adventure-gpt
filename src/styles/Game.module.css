@@ -27,6 +27,10 @@
     padding: 20px;
 }
 
+.msg > p {
+    margin: 15px;
+}
+
 .msg[data-role="user"] {
     color: #fcf;
     text-align: center;
